@@ -1,6 +1,6 @@
 import express, { Request, Response, Router, response } from "express";
 import passport from "../passport/passport-config";
-import { isLoggedIn } from "../middlewares/authMiddleware";
+import { isAdmin, isLoggedIn } from "../middlewares/authMiddleware";
 import User from "../models/user";
 import bcrypt from "bcrypt";
 
@@ -8,7 +8,13 @@ const authRouter: Router = express.Router();
 
 authRouter.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", {
+    scope: [
+      "profile",
+      "email",
+      "https://www.googleapis.com/auth/user.phonenumbers.read",
+    ],
+  })
 );
 authRouter.get(
   "/google/callback",
@@ -50,29 +56,37 @@ authRouter.get("/authenticate", isLoggedIn, async (req, res) => {
   });
 });
 
-// authRouter.post("/login", async (req: Request, res: Response, next) => {
-//   await passport.authenticate("local", (err: any, user: any, info: any) => {
-//     if (err) {
-//       return res
-//         .status(500)
-//         .json({ sucess: false, message: "Internal server error" });
-//     }
-//     if (!user) {
-//       return res.status(200).json({ success: false, message: info.message });
-//     }
-
-//     res.status(200).json({ sucess: true, message: "Login successful", user });
-//   })(req, res, next);
-// });
-
-authRouter.post("/login", passport.authenticate("local"), (req, res) => {});
+authRouter.post("/login", async (req: Request, res: Response, next) => {
+  await passport.authenticate(
+    "local",
+    async (err: any, user: any, info: any) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ sucess: false, message: "Internal server error" });
+      }
+      if (!user) {
+        return res.status(200).json({ success: false, message: info.message });
+      }
+      await req.login(user, (err) => {
+        if (err) {
+          return res.status(200).send({
+            success: false,
+            message: "Errror while setting up the user session",
+          });
+        }
+      });
+      res.status(200).json({ success: true, message: "Login successful" });
+    }
+  )(req, res, next);
+});
 
 authRouter.post("/signup", async (req: Request, res: Response) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, contactNo } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "User with this email already exists",
       });
@@ -80,16 +94,25 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      contactNo,
+    });
     await newUser.save();
 
     res
       .status(201)
       .json({ success: true, message: "User registered successfully" });
   } catch (error) {
-    console.error("Error registering user:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
+authRouter.get("/isAdmin",isAdmin,async (req:Request,res:Response)=>{
+  return res.status(200).send({
+    success:true
+  })
+})
 export default authRouter;

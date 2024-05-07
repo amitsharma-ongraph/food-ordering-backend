@@ -24,6 +24,7 @@ const verifyCallback = async (
     let existingUser: HydratedDocument<IUser> | null = await User.findOne({
       googleId: profile.id,
     });
+    console.log("the google profie is --->", profile);
     if (existingUser) {
       return done(null, existingUser);
     } else {
@@ -31,6 +32,8 @@ const verifyCallback = async (
         googleId: profile.id,
         name: profile.displayName,
         email: profile._json.email,
+        contactNo: "",
+        addressList: [],
       });
 
       const savedUser = await newUser.save();

@@ -3,6 +3,7 @@ import { IUser } from "../../types/Schema/IUsers";
 import { UserModel } from "../../types/Models/UserModel";
 import { IUserMethods } from "../../types/InstanceMethods/IUserMethods";
 import bcrypt from "bcrypt";
+import { addressSchema } from "./address";
 
 export const userSchema: Schema = new mongoose.Schema<
   IUser,
@@ -21,13 +22,8 @@ export const userSchema: Schema = new mongoose.Schema<
   password: {
     type: String,
   },
-  addressLine1: {
-    type: String,
-  },
-  city: {
-    type: String,
-  },
-  country: {
+  addressList: [addressSchema],
+  contactNo: {
     type: String,
   },
 });

@@ -13,7 +13,7 @@ export const localStrategy = new Strategy(async (username, password, done) => {
         message: "Please try signing in using your google Id",
       });
     }
-    const isValidPassword = await user.isValidPassword("sdfsdf");
+    const isValidPassword = await user.isValidPassword(password);
     console.log("strategy is valid password", isValidPassword);
     if (!isValidPassword) {
       return done(null, false, { message: "Incorrect password." });

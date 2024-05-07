@@ -17,3 +17,20 @@ export const isLoggedIn = async (
     });
   }
 };
+
+export const isAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  //@ts-ignore
+  const isAdmin: boolean = req.session.passport.user === process.env.ADMIN_SECRET;
+  if (isAdmin) {
+    next();
+  } else {
+    return res.status(200).send({
+      success: false,
+      message: "not authorized",
+    });
+  }
+};

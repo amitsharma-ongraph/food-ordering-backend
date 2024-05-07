@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import { HydratedDocument } from "mongoose";
 import { IUser } from "../../types/Schema/IUsers";
 import User from "../models/user";
+import { IAddress } from "../../types/Schema/IAddress";
 
 export const userRouter: Router = Router();
 
@@ -22,7 +23,7 @@ userRouter.post("/details", async (req: Request, res: Response) => {
     });
   }
   if (user) {
-    const { _id, name, email } = user;
+    const { _id, name, email, contactNo, addressList } = user;
     return res.status(200).send({
       success: true,
       message: "user details fetched successfully",
@@ -30,7 +31,88 @@ userRouter.post("/details", async (req: Request, res: Response) => {
         id: _id,
         name,
         email,
+        contactNo,
+        addressList,
       },
     });
   }
 });
+
+userRouter.post("/add-address", async (req: Request, res: Response) => {
+  const {
+    id,
+    address: { city, country, zipCode, addressLine, isPrimary },
+  } = req.body;
+  try {
+    const updatedUser: IUser | null = await User.findByIdAndUpdate(
+      id,
+      {
+        $push: {
+          addressList: {
+            city,
+            country,
+            zipCode,
+            addressLine,
+            isPrimary,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    const { _id: addressId } = updatedUser.addressList[
+      updatedUser.addressList.length - 1
+    ] as any;
+    return res.status(201).send({
+      success: true,
+      message: "Address Added Succesfully",
+      addressId,
+    });
+  } catch (error) {
+    return res.status(500);
+  }
+});
+
+userRouter.post(
+  "/address/mark-primary",
+  async (req: Request, res: Response) => {
+    const { addressId, userId } = req.body;
+    console.log("addressId--->", addressId);
+    console.log("userId---->", userId);
+    try {
+      const { addressList }: HydratedDocument<IUser> = await User.findById(
+        userId
+      ).select("addressList");
+      console.log(addressList);
+      if (!addressList) {
+        return res.status(200).send({
+          success: false,
+        });
+      }
+      const updatedAddressList = addressList.map((address: any) => ({
+        ...address._doc,
+        isPrimary: address._id.toString() === addressId,
+      }));
+      const updatedUser = await User.findByIdAndUpdate(userId, {
+        $set: { addressList: updatedAddressList },
+      });
+      if (!updatedUser) {
+        return res.status(200).send({
+          success: "false",
+        });
+      }
+      console.log("updated list---->", updatedAddressList);
+      console.log("updated User---->", updatedUser);
+      return res.status(200).send({
+        success: true,
+      });
+    } catch (error) {
+      return res.status(500);
+    }
+  }
+);

@@ -8,6 +8,7 @@ passport.use(googleStrategy);
 passport.use(localStrategy);
 
 passport.serializeUser((user: any, done) => {
+  console.log("serializing user");
   done(null, user.id);
 });
 

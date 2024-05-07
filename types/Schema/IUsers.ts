@@ -1,11 +1,11 @@
 import { Document } from "mongoose";
+import { IAddress } from "./IAddress";
 
 export interface IUser extends Document {
   googleId: string;
   name: string;
-  addressLine1: string;
-  city: string;
-  country: string;
   email: string;
   password: string;
+  contactNo: string;
+  addressList: IAddress[];
 }
