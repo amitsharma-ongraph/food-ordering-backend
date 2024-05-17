@@ -14,13 +14,12 @@ export const localStrategy = new Strategy(async (username, password, done) => {
       });
     }
     const isValidPassword = await user.isValidPassword(password);
-    console.log("strategy is valid password", isValidPassword);
+
     if (!isValidPassword) {
       return done(null, false, { message: "Incorrect password." });
     }
     return done(null, user);
   } catch (error) {
-    console.log("error while login in --->", error);
     return done(error);
   }
 });

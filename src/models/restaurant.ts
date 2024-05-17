@@ -12,6 +12,8 @@ const restaurantSchema = new mongoose.Schema<IRestaurant, RestaurantModel>({
   menuItems: [menuItemSchema],
   logoUrl: { type: String, required: true },
   status: { type: String, required: true },
+  menuGroups: [{ type: String, required: true }],
+  ratings:{type:String}
 });
 
 const Restaurant = mongoose.model<IRestaurant, RestaurantModel>(

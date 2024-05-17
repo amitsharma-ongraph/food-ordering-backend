@@ -9,6 +9,8 @@ import cookieParser from "cookie-parser";
 import { userRouter } from "./routes/UserRoutes";
 import restroRouter from "./routes/restroRoutes";
 import { AdminRouter } from "./routes/AdminRoutes";
+import SearchRouter from "./routes/SearchRoutes";
+import { mapstyle } from "./constants/mapstyle";
 
 const app: Express = express();
 
@@ -38,13 +40,19 @@ app.use(
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/restaurant", restroRouter);
-app.use("/api/admin",AdminRouter) 
+app.use("/api/admin", AdminRouter);
+app.use("/api/search", SearchRouter);
 
 app.get("/test", async (req: Request, res: Response) => {
   res.status(200).send({
     success: true,
   });
 });
+
+app.get("/mapstyle", async (req: Request, res: Response) => {
+  res.status(200).send(mapstyle);
+});
+
 mongoose.connect(process.env.DB_URI as string).then(() => {
   mongoose.connection.useDb("foodOrdering");
   console.log("connneted");

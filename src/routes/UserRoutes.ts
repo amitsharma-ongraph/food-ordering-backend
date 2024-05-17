@@ -7,7 +7,8 @@ import { IAddress } from "../../types/Schema/IAddress";
 export const userRouter: Router = Router();
 
 userRouter.post("/details", async (req: Request, res: Response) => {
-  const { id } = req.body;
+  try {
+    const { id } = req.body;
   //@ts-ignore
   if (id !== req.session.passport.user) {
     return res.status(200).send({
@@ -36,6 +37,13 @@ userRouter.post("/details", async (req: Request, res: Response) => {
       },
     });
   }
+  } catch (error) {
+    return res.status(200).send({
+      success: false,
+      message: "user not found",
+    });
+  }
+  
 });
 
 userRouter.post("/add-address", async (req: Request, res: Response) => {
@@ -82,13 +90,10 @@ userRouter.post(
   "/address/mark-primary",
   async (req: Request, res: Response) => {
     const { addressId, userId } = req.body;
-    console.log("addressId--->", addressId);
-    console.log("userId---->", userId);
     try {
       const { addressList }: HydratedDocument<IUser> = await User.findById(
         userId
       ).select("addressList");
-      console.log(addressList);
       if (!addressList) {
         return res.status(200).send({
           success: false,
@@ -106,8 +111,7 @@ userRouter.post(
           success: "false",
         });
       }
-      console.log("updated list---->", updatedAddressList);
-      console.log("updated User---->", updatedUser);
+
       return res.status(200).send({
         success: true,
       });

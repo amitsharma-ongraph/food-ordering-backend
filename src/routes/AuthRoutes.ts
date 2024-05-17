@@ -12,7 +12,7 @@ authRouter.get(
     scope: [
       "profile",
       "email",
-      "https://www.googleapis.com/auth/user.phonenumbers.read",
+      "https://www.googleapis.com/auth/user.phonenumbers.read", 
     ],
   })
 );

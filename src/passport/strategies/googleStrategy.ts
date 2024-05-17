@@ -24,7 +24,6 @@ const verifyCallback = async (
     let existingUser: HydratedDocument<IUser> | null = await User.findOne({
       googleId: profile.id,
     });
-    console.log("the google profie is --->", profile);
     if (existingUser) {
       return done(null, existingUser);
     } else {

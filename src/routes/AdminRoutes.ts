@@ -1,32 +1,19 @@
 import express, { Request, Response } from "express";
 import Restaurant from "../models/restaurant";
+import { isAdmin } from "../middlewares/authMiddleware";
 
 export const AdminRouter = express.Router();
 
 AdminRouter.get(
-  "/restaurants/applications",
+  "/restaurants",
+  isAdmin,
   async (req: Request, res: Response) => {
     try {
-      const restroList = await Restaurant.find({ status: "Pending" }).populate(
-        "ownerId"
-      );
+      const restroList = await Restaurant.find().populate("ownerId");
       if (restroList) {
         return res.status(200).send({
           success: true,
-          restroList: restroList.map((restro) => {
-            const owner = restro.ownerId as any;
-            return {
-              _id: restro.id,
-              name: restro.name,
-              logoUrl: restro.logoUrl,
-              address: restro.outlets[0],
-              owner: {
-                _id: owner._id,
-                name: owner.name,
-                email: owner.email,
-              },
-            };
-          }),
+          restroList: restroList,
         });
       }
       return res.status(200).send({

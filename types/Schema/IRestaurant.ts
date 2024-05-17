@@ -10,4 +10,6 @@ export interface IRestaurant extends Document {
   menuItems: IMenuItem[];
   logoUrl: string;
   status: "Approved" | "Pending" | "Rejected";
+  menuGroups: string[];
+  ratings:string
 }

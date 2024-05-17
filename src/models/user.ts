@@ -31,7 +31,7 @@ export const userSchema: Schema = new mongoose.Schema<
 userSchema.method("isValidPassword", async function isValidPassword(password) {
   const userPassword: string = this.password as string;
   const isValidPassword = await bcrypt.compare(password, userPassword);
-  console.log("isValidPassword", isValidPassword);
+
   return isValidPassword;
 });
 

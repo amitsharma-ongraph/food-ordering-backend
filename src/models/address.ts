@@ -7,4 +7,6 @@ export const addressSchema = new mongoose.Schema<IAddress>({
   country: { type: String, required: true },
   zipCode: { type: String, required: true },
   isPrimary: { type: Boolean },
+  longitude: { type: String },
+  latitude: { type: String },
 });
