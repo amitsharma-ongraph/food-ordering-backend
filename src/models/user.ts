@@ -4,6 +4,7 @@ import { UserModel } from "../../types/Models/UserModel";
 import { IUserMethods } from "../../types/InstanceMethods/IUserMethods";
 import bcrypt from "bcrypt";
 import { addressSchema } from "./address";
+import { cartSchema } from "./cart";
 
 export const userSchema: Schema = new mongoose.Schema<
   IUser,
@@ -26,6 +27,7 @@ export const userSchema: Schema = new mongoose.Schema<
   contactNo: {
     type: String,
   },
+  carts: [cartSchema],
 });
 
 userSchema.method("isValidPassword", async function isValidPassword(password) {

@@ -11,6 +11,7 @@ import restroRouter from "./routes/restroRoutes";
 import { AdminRouter } from "./routes/AdminRoutes";
 import SearchRouter from "./routes/SearchRoutes";
 import { mapstyle } from "./constants/mapstyle";
+import { CartRouter } from "./routes/CartRoutes";
 
 const app: Express = express();
 
@@ -42,6 +43,7 @@ app.use("/api/user", userRouter);
 app.use("/api/restaurant", restroRouter);
 app.use("/api/admin", AdminRouter);
 app.use("/api/search", SearchRouter);
+app.use("/api/cart",CartRouter)
 
 app.get("/test", async (req: Request, res: Response) => {
   res.status(200).send({

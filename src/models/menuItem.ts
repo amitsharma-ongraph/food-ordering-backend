@@ -9,5 +9,5 @@ export const menuItemSchema = new mongoose.Schema<IMenuItem>({
   totalReview: { type: Number, required: true },
   imageUrl: { type: String, required: true },
   description: { type: String, required: true },
-  totalOrders: { type: Number, required: true },
+  totalOrders: { type: Number },
 });
