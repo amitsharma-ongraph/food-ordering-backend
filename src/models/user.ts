@@ -3,8 +3,8 @@ import { IUser } from "../../types/Schema/IUsers";
 import { UserModel } from "../../types/Models/UserModel";
 import { IUserMethods } from "../../types/InstanceMethods/IUserMethods";
 import bcrypt from "bcrypt";
-import { addressSchema } from "./address";
-import { cartSchema } from "./cart";
+import { addressSchema } from "../schema/addressSchema";
+import { cartSchema } from "../schema/cartSchema";
 
 export const userSchema: Schema = new mongoose.Schema<
   IUser,

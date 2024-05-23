@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { menuItemSchema } from "./menuItem";
-import { addressSchema } from "./address";
+import { menuItemSchema } from "../schema/menuItemSchema";
+import { addressSchema } from "../schema/addressSchema";
 import { IRestaurant } from "../../types/Schema/IRestaurant";
 import { RestaurantModel } from "../../types/Models/RestaurantModel";
 
@@ -13,7 +13,7 @@ const restaurantSchema = new mongoose.Schema<IRestaurant, RestaurantModel>({
   logoUrl: { type: String, required: true },
   status: { type: String, required: true },
   menuGroups: [{ type: String, required: true }],
-  ratings:{type:String}
+  ratings: { type: String },
 });
 
 const Restaurant = mongoose.model<IRestaurant, RestaurantModel>(
