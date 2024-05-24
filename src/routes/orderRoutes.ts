@@ -134,6 +134,7 @@ OrderRouter.post("/place", isLoggedIn, async (req: Request, res: Response) => {
     return res.status(200).send({
       success: true,
       message: "Order Placed Successfully",
+      order,
     });
   } catch (error) {
     console.log(error);
@@ -278,3 +279,69 @@ OrderRouter.post(
     }
   }
 );
+
+OrderRouter.get(
+  "/user/get-all",
+  isLoggedIn,
+  async (req: Request, res: Response) => {
+    try {
+      //@ts-ignore
+      const userId = req.session.passport.user;
+
+      const orders = await Order.find({ userId })
+        .populate("userId")
+        .populate("restroId");
+
+      const orderList = orders.map((order) => {
+        return {
+          id: order._id,
+
+          restroAddress: {
+            //@ts-ignore
+            ...order.restroAddress._doc,
+            //@ts-ignore
+            name: order.restroId.name,
+          },
+          items: order.items,
+          bill: order.bill,
+          status: order.status,
+          note: order.note,
+          timeline: order.timeline,
+          //@ts-ignore
+          restroId: order.restroId._id,
+          userAddress: {
+            //@ts-ignore
+            name: order.userId.name,
+            //@ts-ignore
+            email: order.userId.email,
+            //@ts-ignore
+            ...order.userAddress._doc,
+          },
+          //@ts-ignore
+          dateTime: order.createdAt,
+        };
+      });
+      res.status(200).send({
+        success: true,
+        orderList,
+      });
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+      });
+    }
+  }
+);
+
+OrderRouter.get("/delete", async (req: Request, res: Response) => {
+  try {
+    await Order.deleteMany({});
+    res.status(200).send({
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+    });
+  }
+});
