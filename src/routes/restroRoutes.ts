@@ -30,12 +30,30 @@ restroRouter.get("/available", async (req: Request, res: Response) => {
 
 restroRouter.post("/signup", async (req: Request, res: Response) => {
   try {
-    const { name, addressLine, city, country, zipCode, logoUrl, ownerId,longitude,latitude} =
-      req.body;
+    const {
+      name,
+      addressLine,
+      city,
+      country,
+      zipCode,
+      logoUrl,
+      ownerId,
+      longitude,
+      latitude,
+    } = req.body;
     const restro = new Restaurant({
       name,
       logoUrl,
-      outlets: [{ addressLine, city, country, zipCode,longitude,latitude } as IAddress],
+      outlets: [
+        {
+          addressLine,
+          city,
+          country,
+          zipCode,
+          longitude,
+          latitude,
+        } as IAddress,
+      ],
       cuisins: [],
       menuItems: [],
       status: "Pending",
@@ -78,7 +96,7 @@ restroRouter.post("/add-cuisine", async (req: Request, res: Response) => {
     const { cuisineName, restroId } = req.body;
     const updatedRestro = await Restaurant.findByIdAndUpdate(restroId, {
       $push: {
-        cuisins:cuisineName,
+        cuisins: cuisineName,
       },
     });
     if (updatedRestro) {
@@ -95,28 +113,29 @@ restroRouter.post("/add-cuisine", async (req: Request, res: Response) => {
   }
 });
 
-
 restroRouter.post("/add-menuitem", async (req: Request, res: Response) => {
   const { name, description, price, imageUrl, restroId, groupName } = req.body;
-  const updatedRestro = await Restaurant.findByIdAndUpdate(restroId, {
-    $push: {
-      menuItems: {
-        name,
-        price,
-        groupName,
-        ratings: "4.0",
-        totalReview: 0,
-        imageUrl,
-        description,
-        totalOrders: 0,
+  const updatedRestro = await Restaurant.findByIdAndUpdate(
+    restroId,
+    {
+      $push: {
+        menuItems: {
+          name,
+          price,
+          groupName,
+          ratings: "4.0",
+          totalReview: 0,
+          imageUrl,
+          description,
+          totalOrders: 0,
+        },
       },
     },
-  },
-  {new:true}
+    { new: true }
   );
   if (updatedRestro) {
     //@ts-ignore
-    const menuItemId=updatedRestro.menuItems[updatedRestro.menuItems.length-1]._id
+    const menuItemId = updatedRestro.menuItems[updatedRestro.menuItems.length - 1]._id;
     return res.status(200).send({
       success: true,
       menuItemId,
@@ -127,19 +146,19 @@ restroRouter.post("/add-menuitem", async (req: Request, res: Response) => {
   });
 });
 
-restroRouter.delete("/delete",async (req:Request,res:Response)=>{
+restroRouter.delete("/delete", async (req: Request, res: Response) => {
   try {
-   //@ts-ignore
-   const userId = req.session.passport.user;
-   const restros:any= await Restaurant.find({ ownerId: userId }).populate(
-     "ownerId"
-   );
-   const restro = restros[0];
+    //@ts-ignore
+    const userId = req.session.passport.user;
+    const restros: any = await Restaurant.find({ ownerId: userId }).populate(
+      "ownerId"
+    );
+    const restro = restros[0];
     if (restro) {
       await Restaurant.findByIdAndDelete(restro.id);
       return res.status(200).send({
-        success:true
-      })
+        success: true,
+      });
     }
     return res.status(200).send({
       success: false,
@@ -149,44 +168,103 @@ restroRouter.delete("/delete",async (req:Request,res:Response)=>{
       success: false,
     });
   }
- 
-})
+});
 
-restroRouter.get("/get-all",async(req:Request,res:Response)=>{
+restroRouter.get("/get-all", async (req: Request, res: Response) => {
   try {
-     const restaurants=await Restaurant.find({status:"Approved"});
-     const allRestaurants=restaurants.map(restro=>({
-      id:restro._id,
-      name:restro.name,
-      ratings:restro.ratings,
-      logoUrl:restro.logoUrl,
-      tags:restro.cuisins.splice(0,2)
-     }))
-     res.status(200).send({
-      success:true,
-      allRestaurants
-     })
+    const restaurants = await Restaurant.find({ status: "Approved" });
+    const allRestaurants = restaurants.map((restro) => ({
+      id: restro._id,
+      name: restro.name,
+      ratings: restro.ratings,
+      logoUrl: restro.logoUrl,
+      tags: restro.cuisins.splice(0, 2),
+    }));
+    res.status(200).send({
+      success: true,
+      allRestaurants,
+    });
   } catch (error) {
     res.status(200).send({
-      success:false
-    })
+      success: false,
+    });
   }
-})
+});
 
-restroRouter.get("/clone",async (req:Request,res:Response)=>{
+restroRouter.get("/clone", async (req: Request, res: Response) => {
+  try {
+    const sourceRestaurant: any = await Restaurant.findById(
+      "66436784f4636d4d8292dfce"
+    );
 
-    try {
-        const sourceRestaurant:any= await Restaurant.findById("66436784f4636d4d8292dfce");
+    const { menuGroups, menuItems } = sourceRestaurant;
+    await Restaurant.updateMany(
+      { _id: { $ne: "66436784f4636d4d8292dfce" } },
+      {
+        $addToSet: {
+          menuGroups: { $each: menuGroups },
+          menuItems: { $each: menuItems },
+        },
+      }
+    );
 
-        const { menuGroups, menuItems } = sourceRestaurant;
-        await Restaurant.updateMany(
-            { _id: { $ne: "66436784f4636d4d8292dfce" } },
-            { $addToSet: { menuGroups: { $each: menuGroups }, menuItems: { $each: menuItems } } }
-        );
+    console.log(
+      "Menu groups and menu items updated successfully for other restaurants."
+    );
+  } catch (error) {
+    console.error("Error updating restaurants:", error);
+  }
+});
 
-        console.log('Menu groups and menu items updated successfully for other restaurants.');
-    } catch (error) {
-        console.error('Error updating restaurants:', error);
+restroRouter.post("/add-outlet", async (req: Request, res: Response) => {
+  const {
+    id,
+    address: {
+      city,
+      country,
+      zipCode,
+      addressLine,
+      isPrimary,
+      longitude,
+      latitude,
+    },
+  } = req.body;
+  try {
+    const updatedRestro: IRestaurant | null =
+      await Restaurant.findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            outlets: {
+              city,
+              country,
+              zipCode,
+              addressLine,
+              isPrimary,
+              longitude,
+              latitude,
+            },
+          },
+        },
+        { new: true }
+      );
+
+    if (!updatedRestro) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Restaurant not found" });
     }
-})
+    const { _id: addressId } = updatedRestro.outlets[
+      updatedRestro.outlets.length - 1
+    ] as any;
+    return res.status(201).send({
+      success: true,
+      message: "Outlet Added Succesfully",
+      addressId,
+    });
+  } catch (error) {
+    return res.status(500);
+  }
+});
+
 export default restroRouter;
