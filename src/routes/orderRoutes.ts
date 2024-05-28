@@ -4,12 +4,12 @@ import Restaurant from "../models/restaurant";
 import { isLoggedIn } from "../middlewares/authMiddleware";
 import Order from "../models/order";
 import { OrderStatus } from "../../enums/OrderStatus";
-import { billSchema } from "../schema/billSchema";
+import { getOptimalDelivery } from "../utils/MapApis";
 
 export const OrderRouter = Router();
 
 OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
-  const { restaurantId, address } = req.body;
+  const { restaurantId, userAddress } = req.body;
 
   try {
     //@ts-ignore
@@ -31,13 +31,26 @@ OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
         message: "couldn't access the cart at this moment",
       });
     }
+
+    const { deliveryAmount } = await getOptimalDelivery(
+      userAddress,
+      restaurant.outlets
+    );
+    console.log("delivert charges-->", deliveryAmount);
+    if (deliveryAmount == null) {
+      return res.status(200).send({
+        success: false,
+        message: "couldn't deliver to this address",
+      });
+    }
     const itemBill = cart.cartItems.reduce((bill, item) => {
       return bill + item.quantity * item.menuItem.price;
     }, 0);
     const gstAmount = 47.15;
-    const deliveryAmount = Math.floor(70 + Math.random() * 30);
     const platfromAmount = 5;
-    const totalAmount = itemBill + gstAmount + deliveryAmount + platfromAmount;
+    const totalAmount = parseFloat(
+      (itemBill + gstAmount + deliveryAmount + platfromAmount).toFixed(2)
+    );
     const bill = {
       itemToatal: itemBill,
       gst: gstAmount,
@@ -81,7 +94,18 @@ OrderRouter.post("/place", isLoggedIn, async (req: Request, res: Response) => {
         message: "Couldn't delivery to this address",
       });
     }
-    const restroAddress = restaurant.outlets[0];
+
+    const { deliveryOutlet, deliveryAmount } = await getOptimalDelivery(
+      userAddress,
+      restaurant.outlets
+    );
+    if (!deliveryOutlet || !deliveryAmount) {
+      return res.status(200).send({
+        success: false,
+        message: "Couldn't deliver to this address",
+      });
+    }
+    const restroAddress = deliveryOutlet;
     const cart = user.carts.find(
       (c) => c.restaurantId.toString() === restaurantId
     );
@@ -91,15 +115,16 @@ OrderRouter.post("/place", isLoggedIn, async (req: Request, res: Response) => {
         message: "couldn't access the cart at this moment",
       });
     }
+    const items = cart.cartItems;
+
     const itemBill = cart.cartItems.reduce((bill, item) => {
       return bill + item.quantity * item.menuItem.price;
     }, 0);
-
-    const items = cart.cartItems;
     const gstAmount = 47.15;
-    const deliveryAmount = Math.floor(70 + Math.random() * 30);
     const platfromAmount = 5;
-    const totalAmount = itemBill + gstAmount + deliveryAmount + platfromAmount;
+    const totalAmount = parseFloat(
+      (itemBill + gstAmount + deliveryAmount + platfromAmount).toFixed(2)
+    );
     const bill = {
       itemToatal: itemBill,
       gst: gstAmount,
