@@ -39,6 +39,14 @@ app.use(
   })
 );
 
+app.use(
+  cors({
+    origin: "https://flavourfleet.vercel.app/",
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  })
+);
+
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/restaurant", restroRouter);
