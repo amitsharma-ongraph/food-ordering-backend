@@ -17,12 +17,14 @@ import { PaymentRouter } from "./routes/PaymentRoutes";
 
 const app: Express = express();
 
+console.log("node enviorment-->", process.env.NODE_ENV);
 app.use(
   cookieSession({
     name: "session",
     keys: [process.env.SESSION_SECRET || ""],
     maxAge: 24 * 60 * 60 * 1000,
     secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   })
 );
 
@@ -31,6 +33,8 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
+
+app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "http://localhost:3000",
