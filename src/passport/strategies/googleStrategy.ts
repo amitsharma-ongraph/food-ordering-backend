@@ -48,7 +48,7 @@ export const googleStrategy = new Strategy(
   {
     clientID: config.clientId,
     clientSecret: config.clientSecret,
-    callbackURL: "http://localhost:5000/api/auth/google/callback",
+    callbackURL: "/api/auth/google/callback",
   },
   verifyCallback
 );
