@@ -16,11 +16,12 @@ authRouter.get(
     ],
   })
 );
+
 authRouter.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: "/login",
-    successRedirect: process.env.CLIENT_URL || "http://localhost:3000",
+    successRedirect: process.env.CLIENT_URL,
   }),
   (req, res) => {
     res.redirect("/");
