@@ -4,7 +4,10 @@ import Restaurant from "../models/restaurant";
 import { isLoggedIn } from "../middlewares/authMiddleware";
 import Order from "../models/order";
 import { OrderStatus } from "../../enums/OrderStatus";
-import { getOptimalDelivery } from "../utils/MapApis";
+import { getOptimalDelivery } from "../utils/OptimalDelivery";
+import { getRoute } from "../utils/MapRoute";
+import Package from "../models/package";
+import { IRestaurant } from "../../types/Schema/IRestaurant";
 
 export const OrderRouter = Router();
 
@@ -284,6 +287,21 @@ OrderRouter.post(
             : order.timeline[OrderStatus.Rejected],
       };
       order.save();
+      if (status === OrderStatus.Out) {
+        const routeCoords = await getRoute(
+          order.restroAddress,
+          order.userAddress
+        );
+        const totalPoints = routeCoords?.length;
+        const newPackage = new Package({
+          orderId,
+          waypoints: routeCoords,
+          index: 0,
+          totalPoints,
+        });
+        await newPackage.save();
+      }
+
       const timeline = order.timeline;
       let sortedTimeline;
       const entries = Object.entries(timeline);
@@ -358,14 +376,39 @@ OrderRouter.get(
   }
 );
 
-OrderRouter.get("/delete", async (req: Request, res: Response) => {
+OrderRouter.get("/tracking/:id", async (req: Request, res: Response) => {
+  const id = req.params.id;
   try {
-    await Order.deleteMany({});
-    res.status(200).send({
+    const order = await Order.findById(id).populate("restroId");
+    const { name } = order?.restroId as any;
+
+    const trackingInfo = await Package.findOne({ orderId: id });
+    return res.status(200).send({
       success: true,
+      trackingInfo,
+      orderInfo: {
+        restroName: name,
+      },
     });
   } catch (error) {
-    res.status(500).send({
+    console.log("errrror-->", error);
+    return res.status(500).send({
+      success: false,
+    });
+  }
+});
+
+OrderRouter.get("/livePosition/:id", async (req: Request, res: Response) => {
+  const id = req.params.id;
+  try {
+    const orderPackage = await Package.findById(id);
+    return res.status(200).send({
+      success: true,
+      liveIndex: orderPackage?.index,
+    });
+  } catch (error) {
+    console.log("errrror-->", error);
+    return res.status(500).send({
       success: false,
     });
   }

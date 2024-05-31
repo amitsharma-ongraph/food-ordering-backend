@@ -13,6 +13,7 @@ import SearchRouter from "./routes/SearchRoutes";
 import { mapstyle } from "./constants/mapstyle";
 import { CartRouter } from "./routes/CartRoutes";
 import { OrderRouter } from "./routes/orderRoutes";
+import { PaymentRouter } from "./routes/PaymentRoutes";
 
 const app: Express = express();
 
@@ -31,17 +32,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true,
-  })
-);
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://flavourfleet.vercel.app",
+];
 
 app.use(
   cors({
-    origin: "https://flavourfleet.vercel.app/",
+    origin: allowedOrigins,
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
@@ -54,6 +52,7 @@ app.use("/api/admin", AdminRouter);
 app.use("/api/search", SearchRouter);
 app.use("/api/cart", CartRouter);
 app.use("/api/order", OrderRouter);
+app.use("/api/payment", PaymentRouter);
 
 app.get("/test", async (req: Request, res: Response) => {
   res.status(200).send({
