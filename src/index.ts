@@ -17,14 +17,13 @@ import { PaymentRouter } from "./routes/PaymentRoutes";
 
 const app: Express = express();
 
-console.log("node enviorment-->", process.env.NODE_ENV);
 app.use(
   cookieSession({
     name: "session",
     keys: [process.env.SESSION_SECRET || ""],
     maxAge: 24 * 60 * 60 * 1000,
-    secure: false,
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   })
 );
 
