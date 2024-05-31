@@ -12,7 +12,7 @@ authRouter.get(
     scope: [
       "profile",
       "email",
-      "https://www.googleapis.com/auth/user.phonenumbers.read", 
+      "https://www.googleapis.com/auth/user.phonenumbers.read",
     ],
   })
 );
@@ -20,7 +20,7 @@ authRouter.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: "/login",
-    successRedirect: "http://localhost:3000/",
+    successRedirect: process.env.CLIENT_URL || "http://localhost:3000",
   }),
   (req, res) => {
     res.redirect("/");
@@ -110,9 +110,9 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
   }
 });
 
-authRouter.get("/isAdmin",isAdmin,async (req:Request,res:Response)=>{
+authRouter.get("/isAdmin", isAdmin, async (req: Request, res: Response) => {
   return res.status(200).send({
-    success:true
-  })
-})
+    success: true,
+  });
+});
 export default authRouter;
