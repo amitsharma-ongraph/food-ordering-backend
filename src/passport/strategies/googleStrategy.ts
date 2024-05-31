@@ -48,7 +48,7 @@ export const googleStrategy = new Strategy(
   {
     clientID: config.clientId,
     clientSecret: config.clientSecret,
-    callbackURL: "/api/auth/google/callback",
+    callbackURL: process.env.GOOGLE_CALLBACK_URL,
   },
   verifyCallback
 );
