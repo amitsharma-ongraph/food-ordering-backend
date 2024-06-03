@@ -14,6 +14,7 @@ const restaurantSchema = new mongoose.Schema<IRestaurant, RestaurantModel>({
   status: { type: String, required: true },
   menuGroups: [{ type: String, required: true }],
   ratings: { type: String },
+  isVeg:{type:Boolean,default:false}
 });
 
 const Restaurant = mongoose.model<IRestaurant, RestaurantModel>(

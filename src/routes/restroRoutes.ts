@@ -170,26 +170,7 @@ restroRouter.delete("/delete", async (req: Request, res: Response) => {
   }
 });
 
-restroRouter.get("/get-all", async (req: Request, res: Response) => {
-  try {
-    const restaurants = await Restaurant.find({ status: "Approved" });
-    const allRestaurants = restaurants.map((restro) => ({
-      id: restro._id,
-      name: restro.name,
-      ratings: restro.ratings,
-      logoUrl: restro.logoUrl,
-      tags: restro.cuisins.splice(0, 2),
-    }));
-    res.status(200).send({
-      success: true,
-      allRestaurants,
-    });
-  } catch (error) {
-    res.status(200).send({
-      success: false,
-    });
-  }
-});
+
 
 restroRouter.get("/clone", async (req: Request, res: Response) => {
   try {
@@ -264,6 +245,35 @@ restroRouter.post("/add-outlet", async (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(500);
+  }
+});
+
+restroRouter.get("/get-all", async (req: Request, res: Response) => {
+  try {
+    const { rating,veg } = req.query;
+    let filter:any={status:"Approved"}
+    if(rating){
+      filter.ratings={"$gte":"4"}
+    }
+    if(veg){
+      filter.isVeg=true
+    }
+    const restaurants = await Restaurant.find(filter);
+    const allRestaurants = restaurants.map((restro) => ({
+      id: restro._id,
+      name: restro.name,
+      ratings: restro.ratings,
+      logoUrl: restro.logoUrl,
+      tags: restro.cuisins.splice(0, 2),
+    }));
+    res.status(200).send({
+      success: true,
+      allRestaurants,
+    });
+  } catch (error) {
+    res.status(200).send({
+      success: false,
+    });
   }
 });
 
