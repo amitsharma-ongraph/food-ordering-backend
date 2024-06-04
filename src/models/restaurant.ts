@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { menuItemSchema } from "../schema/menuItemSchema";
-import { addressSchema } from "../schema/addressSchema";
+import  addressSchema  from "../schema/addressSchema";
 import { IRestaurant } from "../../types/Schema/IRestaurant";
 import { RestaurantModel } from "../../types/Models/RestaurantModel";
 

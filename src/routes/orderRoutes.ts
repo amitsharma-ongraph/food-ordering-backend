@@ -14,6 +14,8 @@ export const OrderRouter = Router();
 OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
   const { restaurantId, userAddress } = req.body;
 
+  console.log("userAddress-->",userAddress)
+
   try {
     //@ts-ignore
     const userId = req.session.passport.user;

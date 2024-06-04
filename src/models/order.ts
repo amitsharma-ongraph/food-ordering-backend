@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IOrder } from "../../types/Schema/IOrder";
 import { OrderModel } from "../../types/Models/OrderModel";
-import { addressSchema } from "../schema/addressSchema";
+import  addressSchema  from "../schema/addressSchema";
 import { billSchema } from "../schema/billSchema";
 import { cartItemSchema } from "../schema/cartItemSchema";
 
