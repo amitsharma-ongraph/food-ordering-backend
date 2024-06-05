@@ -12,4 +12,5 @@ export interface IRestaurant extends Document {
   status: "Approved" | "Pending" | "Rejected";
   menuGroups: string[];
   ratings:string
+  isVeg:boolean
 }

@@ -54,8 +54,7 @@ userRouter.post("/add-address", async (req: Request, res: Response) => {
       zipCode,
       addressLine,
       isPrimary,
-      longitude,
-      latitude,
+      location
     },
   } = req.body;
   try {
@@ -69,8 +68,7 @@ userRouter.post("/add-address", async (req: Request, res: Response) => {
             zipCode,
             addressLine,
             isPrimary,
-            longitude,
-            latitude,
+            location
           },
         },
       },

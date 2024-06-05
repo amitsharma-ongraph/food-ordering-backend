@@ -10,4 +10,5 @@ export interface IUser extends Document {
   contactNo: string;
   addressList: IAddress[];
   carts: ICart[];
+  verified:boolean
 }

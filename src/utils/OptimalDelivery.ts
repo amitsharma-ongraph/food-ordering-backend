@@ -10,9 +10,9 @@ export const getOptimalDelivery = async (
   outlets: IAddress[]
 ): Promise<IReturns> => {
   const apiKey = process.env.LOCATION_IQ_API_KEY;
-  const source = `${userAddress.longitude},${userAddress.latitude}`;
+  const source = `${userAddress.location.coordinates[0]},${userAddress.location.coordinates[1]}`;
   const destinations = outlets.map(
-    (outlet) => `${outlet.longitude},${outlet.latitude}`
+    (outlet) => `${outlet.location.coordinates[0]},${outlet.location.coordinates[1]}`
   );
   const destinationIndexs = destinations.map((d, i) => i + 1);
   const baseUrl = "https://us1.locationiq.com/v1/matrix/driving/";

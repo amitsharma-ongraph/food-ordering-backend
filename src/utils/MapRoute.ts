@@ -7,8 +7,8 @@ export const getRoute = async (
   destinationAddress: IAddress
 ) => {
   const apiKey = process.env.LOCATION_IQ_API_KEY;
-  const source = `${sourceAddress.longitude},${sourceAddress.latitude}`;
-  const destination = `${destinationAddress.longitude},${destinationAddress.latitude}`;
+  const source = `${sourceAddress.location.coordinates[0]},${sourceAddress.location.coordinates[1]}`;
+  const destination = `${destinationAddress.location.coordinates[0]},${destinationAddress.location.coordinates[1]}`;
   const coordinates = [source, destination].join(";");
   const baseUrl = "https://us1.locationiq.com/v1/directions/driving/";
 

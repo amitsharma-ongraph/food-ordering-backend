@@ -4,6 +4,5 @@ export interface IAddress extends Document {
   country: string;
   zipCode: string;
   isPrimary: boolean;
-  longitude: string;
-  latitude: string;
+  location:any
 }

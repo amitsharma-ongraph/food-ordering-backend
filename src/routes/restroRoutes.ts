@@ -50,8 +50,9 @@ restroRouter.post("/signup", async (req: Request, res: Response) => {
           city,
           country,
           zipCode,
-          longitude,
-          latitude,
+          location:{
+            coordinates:[longitude,latitude]
+          }
         } as IAddress,
       ],
       cuisins: [],
@@ -65,6 +66,7 @@ restroRouter.post("/signup", async (req: Request, res: Response) => {
       success: true,
     });
   } catch (error) {
+    console.log("error-->",error)
     res.status(500);
   }
 });
@@ -170,26 +172,7 @@ restroRouter.delete("/delete", async (req: Request, res: Response) => {
   }
 });
 
-restroRouter.get("/get-all", async (req: Request, res: Response) => {
-  try {
-    const restaurants = await Restaurant.find({ status: "Approved" });
-    const allRestaurants = restaurants.map((restro) => ({
-      id: restro._id,
-      name: restro.name,
-      ratings: restro.ratings,
-      logoUrl: restro.logoUrl,
-      tags: restro.cuisins.splice(0, 2),
-    }));
-    res.status(200).send({
-      success: true,
-      allRestaurants,
-    });
-  } catch (error) {
-    res.status(200).send({
-      success: false,
-    });
-  }
-});
+
 
 restroRouter.get("/clone", async (req: Request, res: Response) => {
   try {
@@ -225,8 +208,7 @@ restroRouter.post("/add-outlet", async (req: Request, res: Response) => {
       zipCode,
       addressLine,
       isPrimary,
-      longitude,
-      latitude,
+      location
     },
   } = req.body;
   try {
@@ -241,8 +223,7 @@ restroRouter.post("/add-outlet", async (req: Request, res: Response) => {
               zipCode,
               addressLine,
               isPrimary,
-              longitude,
-              latitude,
+              location
             },
           },
         },
@@ -264,6 +245,69 @@ restroRouter.post("/add-outlet", async (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(500);
+  }
+});
+
+restroRouter.get("/get-all", async (req: Request, res: Response) => {
+  try {
+
+    const { rating,veg ,longitude:lon,latitude:lat,nearest} = req.query;
+    const longitude=lon?.toString();
+    const latitude=lat?.toString();
+
+    let filter:any=[{status:"Approved"}]
+    if(rating){
+      filter.push({ratings:{"$gte":"4"}})
+    }
+    if(veg){
+      filter.push({isVeg:true})
+    }
+    if(nearest){
+      filter.push({"outlets.distance":{"$lte":3000}})
+    }
+    if(!longitude||!latitude){
+      return res.status(200).send({
+        success:true,
+        allRestaurants:[]
+      })
+    }
+
+    const restaurants = await Restaurant.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [Number(longitude),Number(latitude) ]
+          },
+          distanceField: "outlets.distance",
+          spherical: true,
+          key:"outlets.location"
+        }
+      },
+      {
+        $match:{
+          $and:filter
+        }
+      }
+    ]);
+    
+    const allRestaurants = restaurants.map((restro) => ({
+      id: restro._id,
+      name: restro.name,
+      ratings: restro.ratings,
+      logoUrl: restro.logoUrl,
+      tags: restro.cuisins.splice(0, 2),
+      distance:restro.outlets.distance
+    }));
+    res.status(200).send({
+      success: true,
+      allRestaurants,
+    });
+  } catch (error) {
+    console.log(error)
+    res.status(200).send({
+      success: false,
+    });
   }
 });
 
