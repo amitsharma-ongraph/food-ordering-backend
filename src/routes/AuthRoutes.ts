@@ -118,7 +118,7 @@ authRouter.get("/isAdmin", isAdmin, async (req: Request, res: Response) => {
   });
 });
  
-authRouter.get("/verification/role",async(req:Request,res:Response)=>{
+authRouter.post("/verification/role",async(req:Request,res:Response)=>{
   try {
     //@ts-ignore
     const userId=req.session.passport.user
