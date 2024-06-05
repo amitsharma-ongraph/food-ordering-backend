@@ -3,6 +3,7 @@ import passport from "../passport/passport-config";
 import { isAdmin, isLoggedIn } from "../middlewares/authMiddleware";
 import User from "../models/user";
 import bcrypt from "bcrypt";
+import Restaurant from "../models/restaurant";
 
 const authRouter: Router = express.Router();
 
@@ -84,7 +85,7 @@ authRouter.post("/login", async (req: Request, res: Response, next) => {
 
 authRouter.post("/signup", async (req: Request, res: Response) => {
   try {
-    const { email, password, name, contactNo } = req.body;
+    const { email, password, name } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(200).json({
@@ -99,7 +100,7 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
       name,
       email,
       password: hashedPassword,
-      contactNo,
+      contactNo:null,
     });
     await newUser.save();
 
@@ -116,4 +117,49 @@ authRouter.get("/isAdmin", isAdmin, async (req: Request, res: Response) => {
     success: true,
   });
 });
+ 
+authRouter.get("/verification/role",async(req:Request,res:Response)=>{
+  try {
+    //@ts-ignore
+    const userId=req.session.passport.user
+
+    if(!userId){
+      return res.status(200).send({
+        success:false
+      })
+    }
+    const user=await User.findById(userId);
+    if(!user){
+      return res.status(200).send({
+        success:false
+      })
+    }
+    const restros: any = await Restaurant.find({ ownerId: userId }).populate(
+      "ownerId"
+    );
+    const restro = restros[0];
+    if (restro) {
+      return res.status(200).send({
+        success: true,
+        role:"Restaurant"
+      });
+    }
+    
+    const isAdmin: boolean =  userId === process.env.ADMIN_SECRET;
+    if(isAdmin){
+      return res.status(200).send({
+        success:true,
+        role:"Admin"
+      })
+    }
+    return res.status(200).send({
+        success:true,
+        role:"User"
+    })
+  } catch (error) {
+    return res.status(200).send({
+      success:false
+    });
+  }
+})
 export default authRouter;

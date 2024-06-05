@@ -28,6 +28,7 @@ export const userSchema: Schema = new mongoose.Schema<
     type: String,
   },
   carts: [cartSchema],
+  verified:{type:Boolean,default:false}
 });
 
 userSchema.method("isValidPassword", async function isValidPassword(password) {
