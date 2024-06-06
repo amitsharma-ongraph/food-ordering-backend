@@ -43,14 +43,11 @@ PaymentRouter.post("/verify", async (req, res) => {
       order_id,
     } = req.body;
     const sign = order_id + "|" + razorpay_payment_id;
-    console.log("sign-->", sign);
     const secret = process.env.RAZORPAY_KEY_SECRET || "";
     const resultSign = crypto
       .createHmac("sha256", secret)
       .update(sign.toString())
       .digest("hex");
-    console.log("key secret", secret);
-    console.log("result sign", resultSign);
     if (razorpay_signature == resultSign) {
       return res.status(200).send({
         success: true,

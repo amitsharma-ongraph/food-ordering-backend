@@ -4,6 +4,7 @@ import { isAdmin, isLoggedIn } from "../middlewares/authMiddleware";
 import User from "../models/user";
 import bcrypt from "bcrypt";
 import Restaurant from "../models/restaurant";
+import { TwilioClient } from "../twilio";
 
 const authRouter: Router = express.Router();
 
@@ -100,7 +101,7 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
       name,
       email,
       password: hashedPassword,
-      contactNo:null,
+      contactNo: null,
     });
     await newUser.save();
 
@@ -117,22 +118,22 @@ authRouter.get("/isAdmin", isAdmin, async (req: Request, res: Response) => {
     success: true,
   });
 });
- 
-authRouter.post("/verification/role",async(req:Request,res:Response)=>{
+
+authRouter.post("/verification/role", async (req: Request, res: Response) => {
   try {
     //@ts-ignore
-    const userId=req.session.passport.user
+    const userId = req.session.passport.user;
 
-    if(!userId){
+    if (!userId) {
       return res.status(200).send({
-        success:false
-      })
+        success: false,
+      });
     }
-    const user=await User.findById(userId);
-    if(!user){
+    const user = await User.findById(userId);
+    if (!user) {
       return res.status(200).send({
-        success:false
-      })
+        success: false,
+      });
     }
     const restros: any = await Restaurant.find({ ownerId: userId }).populate(
       "ownerId"
@@ -141,25 +142,100 @@ authRouter.post("/verification/role",async(req:Request,res:Response)=>{
     if (restro) {
       return res.status(200).send({
         success: true,
-        role:"Restaurant"
+        role: "Restaurant",
       });
     }
-    
-    const isAdmin: boolean =  userId === process.env.ADMIN_SECRET;
-    if(isAdmin){
+
+    const isAdmin: boolean = userId === process.env.ADMIN_SECRET;
+    if (isAdmin) {
       return res.status(200).send({
-        success:true,
-        role:"Admin"
-      })
+        success: true,
+        role: "Admin",
+      });
     }
     return res.status(200).send({
-        success:true,
-        role:"User"
-    })
+      success: true,
+      role: "User",
+    });
   } catch (error) {
     return res.status(200).send({
-      success:false
+      success: false,
     });
   }
-})
+});
+
+authRouter.get("/verification/contact", async (req: Request, res: Response) => {
+  try {
+    //@ts-ignore
+    const userId = req.session.passport.user;
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      return res.status(200).send({
+        success: false,
+      });
+    }
+    const verfied = user.verified;
+    if (verfied) {
+      return res.status(200).send({
+        success: true,
+      });
+    }
+    return res.status(200).send({
+      success: false,
+    });
+  } catch (error) {
+    return res.status(200).send({
+      success: false,
+    });
+  }
+});
+
+authRouter.post("/send-otp", async (req, res) => {
+  const { phoneNumber } = req.body;
+  const verifyServiceSid = process.env.TWILIO_SERVICE_SID || "";
+  await TwilioClient.verify.v2
+    .services(verifyServiceSid)
+    .verifications.create({ to: `+91${phoneNumber}`, channel: "sms" })
+    .then((verification) => res.status(200).send({ success: true }))
+    .catch((error) => res.status(500).send({ success: false }));
+});
+
+authRouter.post("/verify-otp", async (req, res) => {
+  //@ts-ignore
+  const userId = req.session.passport.user;
+  const { phoneNumber, otp } = req.body;
+  const verifyServiceSid = process.env.TWILIO_SERVICE_SID || "";
+  await TwilioClient.verify.v2
+    .services(verifyServiceSid)
+    .verificationChecks.create({ to: `+91${phoneNumber}`, code: otp })
+    .then(async (verification_check) => {
+      if (verification_check.status === "approved") {
+        try {
+          const user = await User.findByIdAndUpdate(userId, {
+            contactNo: phoneNumber,
+            verified: true,
+          });
+          console.log("user -->", user);
+          if (!user) {
+            throw new Error("user not found");
+          }
+          return res.status(200).send({
+            success: true,
+          });
+        } catch (error) {
+          console.log("user error->", error);
+          return res.status(500);
+        }
+      } else {
+        return res.status(200).send({
+          success: false,
+        });
+      }
+    })
+    .catch((error) => {
+      console.log("opt error ", error);
+      return res.status(500).send(`Failed to verify OTP: ${error.message}`);
+    });
+});
+
 export default authRouter;
