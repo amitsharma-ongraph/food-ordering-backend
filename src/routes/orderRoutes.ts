@@ -7,7 +7,6 @@ import { OrderStatus } from "../../enums/OrderStatus";
 import { getOptimalDelivery } from "../utils/OptimalDelivery";
 import { getRoute } from "../utils/MapRoute";
 import Package from "../models/package";
-import { IRestaurant } from "../../types/Schema/IRestaurant";
 
 export const OrderRouter = Router();
 
