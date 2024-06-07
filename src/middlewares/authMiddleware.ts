@@ -7,6 +7,7 @@ export const isLoggedIn = async (
   next: NextFunction
 ) => {
   try {
+    console.log("req headers", req.headers.cookie);
     //@ts-ignore
     const isLoggedIn: boolean =(req.isAuthenticated() && req.user!==undefined) ? true : false;
     if (isLoggedIn) {
@@ -42,7 +43,7 @@ export const isAdmin = async (
   if (isAdmin) {
     next();
   } else {
-    return res.status(200).send({
+    return res.status(200).send({ 
       success: false,
       message: "not authorized",
     });
