@@ -7,14 +7,11 @@ import { OrderStatus } from "../../enums/OrderStatus";
 import { getOptimalDelivery } from "../utils/OptimalDelivery";
 import { getRoute } from "../utils/MapRoute";
 import Package from "../models/package";
-import { IRestaurant } from "../../types/Schema/IRestaurant";
 
 export const OrderRouter = Router();
 
 OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
   const { restaurantId, userAddress } = req.body;
-
-  console.log("userAddress-->",userAddress)
 
   try {
     //@ts-ignore
@@ -41,7 +38,6 @@ OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
       userAddress,
       restaurant.outlets
     );
-    console.log("delivert charges-->", deliveryAmount);
     if (deliveryAmount == null) {
       return res.status(200).send({
         success: false,
@@ -189,7 +185,9 @@ OrderRouter.get(
         });
       }
       const restroId = restaurant._id;
-      const orders = await Order.find({ restroId }).sort({createdAt:-1}).populate("userId");
+      const orders = await Order.find({ restroId })
+        .sort({ createdAt: -1 })
+        .populate("userId");
 
       const orderList = orders.map((order) => {
         return {
@@ -333,7 +331,8 @@ OrderRouter.get(
       //@ts-ignore
       const userId = req.session.passport.user;
 
-      const orders = await Order.find({ userId }).sort({createdAt:-1})
+      const orders = await Order.find({ userId })
+        .sort({ createdAt: -1 })
         .populate("userId")
         .populate("restroId");
 
