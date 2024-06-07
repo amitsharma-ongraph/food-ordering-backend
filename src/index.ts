@@ -33,8 +33,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
 
-app.set("trust proxy", 1);
-
 const allowedOrigins = [
   "http://localhost:3000",
   "https://flavourfleet.vercel.app",
