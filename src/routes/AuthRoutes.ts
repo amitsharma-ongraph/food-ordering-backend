@@ -215,7 +215,7 @@ authRouter.post("/verify-otp", async (req, res) => {
             contactNo: phoneNumber,
             verified: true,
           });
-          console.log("user -->", user);
+
           if (!user) {
             throw new Error("user not found");
           }
