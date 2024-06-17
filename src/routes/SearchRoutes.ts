@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import Restaurant from "../models/restaurant";
+import Coupon from "../models/coupon";
 
 const SearchRouter = express.Router();
 
@@ -184,6 +185,11 @@ SearchRouter.get("/restro-menu/:id", async (req: Request, res: Response) => {
       description: menuItem.description,
       groupName: menuItem.groupName,
     }));
+    const coupons = await Coupon.find({
+      restroId: id,
+      isPublic: true,
+      activated: true,
+    });
     if (restaurant) {
       return res.status(200).send({
         success: true,
@@ -196,6 +202,7 @@ SearchRouter.get("/restro-menu/:id", async (req: Request, res: Response) => {
           logoUrl: restaurant.logoUrl,
           ratings: restaurant.ratings,
           menuGroups: restaurant.menuGroups,
+          coupons,
         },
       });
     }

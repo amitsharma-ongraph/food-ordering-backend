@@ -14,6 +14,7 @@ import { mapstyle } from "./constants/mapstyle";
 import { CartRouter } from "./routes/CartRoutes";
 import { OrderRouter } from "./routes/orderRoutes";
 import { PaymentRouter } from "./routes/PaymentRoutes";
+import { CouponRouter } from "./routes/CouponRoutes";
 
 const app: Express = express();
 
@@ -23,7 +24,7 @@ app.use(
     keys: [process.env.SESSION_SECRET || ""],
     maxAge: 24 * 60 * 60 * 1000,
     secure: process.env.NODE_ENV === "production",
-    sameSite:process.env.Node_ENV==="production"?"none":"lax"
+    sameSite: process.env.Node_ENV === "production" ? "none" : "lax",
   })
 );
 
@@ -54,6 +55,7 @@ app.use("/api/search", SearchRouter);
 app.use("/api/cart", CartRouter);
 app.use("/api/order", OrderRouter);
 app.use("/api/payment", PaymentRouter);
+app.use("/api/coupons", CouponRouter);
 
 app.get("/test", async (req: Request, res: Response) => {
   res.status(200).send({
