@@ -1,4 +1,5 @@
 export interface IMenuItem extends Document {
+  id: string;
   name: string;
   price: number;
   groupName: string;

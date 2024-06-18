@@ -7,6 +7,7 @@ export const billSchema = new Schema<IBill>({
   delivery: { type: Number, required: true },
   platfrom: { type: Number, required: true },
   grandTotal: { type: Number, required: true },
+  discount: { type: Number, required: true },
   roundOff: { type: Number, required: true },
   toPay: { type: Number, required: true },
 });

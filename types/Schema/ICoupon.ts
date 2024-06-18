@@ -12,7 +12,7 @@ export interface ICoupon {
   giftItemId?: string;
   condition: DiscountCondition;
   billAmount?: number;
-  combination?: ObjectId[];
+  combination?: string[];
   activated: boolean;
   isPublic: boolean;
   upto: number;
