@@ -164,7 +164,7 @@ OrderRouter.post("/place", isLoggedIn, async (req: Request, res: Response) => {
     const coupon = await Coupon.findOne({
       code: couponCode,
       restroId: restaurantId,
-    }).lean();
+    });
     const couponResponse = getCouponResponse(
       coupon,
       cart,
@@ -218,6 +218,10 @@ OrderRouter.post("/place", isLoggedIn, async (req: Request, res: Response) => {
       },
     });
     await order.save();
+    if (coupon) {
+      coupon.availed += 1;
+      await coupon.save();
+    }
     const newCarts = user.carts.filter(
       (c) => c.restaurantId !== cart.restaurantId
     );
