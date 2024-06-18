@@ -3,6 +3,7 @@ import { DiscountType } from "../../enums/DiscountType";
 import { DiscountCondition } from "../../enums/DiscountCondition";
 
 export interface ICoupon {
+  _id: string;
   restroId: ObjectId;
   code: string;
   redemptions?: number;
