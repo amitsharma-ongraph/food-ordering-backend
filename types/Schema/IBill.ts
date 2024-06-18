@@ -4,6 +4,7 @@ export interface IBill {
   delivery: number;
   platfrom: number;
   grandTotal: number;
+  discount: number;
   roundOff: number;
   toPay: number;
 }

@@ -7,11 +7,16 @@ import { OrderStatus } from "../../enums/OrderStatus";
 import { getOptimalDelivery } from "../utils/OptimalDelivery";
 import { getRoute } from "../utils/MapRoute";
 import Package from "../models/package";
+import Coupon from "../models/coupon";
+import { DiscountType } from "../../enums/DiscountType";
+import { DiscountCondition } from "../../enums/DiscountCondition";
+import { getCouponResponse } from "../utils/coupons";
+import { IMenuItem } from "../../types/Schema/IMenuItem";
 
 export const OrderRouter = Router();
 
 OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
-  const { restaurantId, userAddress } = req.body;
+  const { restaurantId, userAddress, couponCode } = req.body;
 
   try {
     //@ts-ignore
@@ -52,18 +57,46 @@ OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
     const totalAmount = parseFloat(
       (itemBill + gstAmount + deliveryAmount + platfromAmount).toFixed(2)
     );
+    let discount = 0;
+    const coupon = await Coupon.findOne({
+      code: couponCode,
+      restroId: restaurantId,
+    }).lean();
+    const couponResponse = getCouponResponse(
+      coupon,
+      cart,
+      restaurant.menuItems
+    );
+    const { appliedCoupon } = couponResponse;
+    if (appliedCoupon) {
+      if (appliedCoupon.type === DiscountType.FLAT && appliedCoupon.discount) {
+        discount = appliedCoupon.discount;
+      } else if (
+        appliedCoupon.type === DiscountType.PERCENTAGE &&
+        appliedCoupon.discount
+      ) {
+        discount = (itemBill * appliedCoupon.discount) / 100;
+        if (discount > appliedCoupon.upto) {
+          discount = appliedCoupon.upto;
+        }
+      }
+    }
     const bill = {
       itemToatal: itemBill,
       gst: gstAmount,
       delivery: deliveryAmount,
       platfrom: platfromAmount,
       grandTotal: totalAmount,
-      roundOff: parseFloat((totalAmount - Math.floor(totalAmount)).toFixed(2)),
-      toPay: Math.floor(totalAmount),
+      discount,
+      roundOff: parseFloat(
+        (totalAmount - discount - Math.floor(totalAmount - discount)).toFixed(2)
+      ),
+      toPay: Math.floor(totalAmount - discount),
     };
     return res.status(200).send({
       success: true,
       bill,
+      couponResponse: couponCode ? couponResponse : undefined,
     });
   } catch (error) {
     return res.status(500).send({
@@ -73,7 +106,8 @@ OrderRouter.post("/bill", isLoggedIn, async (req: Request, res: Response) => {
 });
 
 OrderRouter.post("/place", isLoggedIn, async (req: Request, res: Response) => {
-  const { restaurantId, userAddressId, note } = req.body;
+  const { restaurantId, userAddressId, note, couponCode } = req.body;
+
   try {
     //@ts-ignore
     const userId = req.session.passport.user;
@@ -126,15 +160,48 @@ OrderRouter.post("/place", isLoggedIn, async (req: Request, res: Response) => {
     const totalAmount = parseFloat(
       (itemBill + gstAmount + deliveryAmount + platfromAmount).toFixed(2)
     );
+    let discount = 0;
+    const coupon = await Coupon.findOne({
+      code: couponCode,
+      restroId: restaurantId,
+    }).lean();
+    const couponResponse = getCouponResponse(
+      coupon,
+      cart,
+      restaurant.menuItems
+    );
+    const { appliedCoupon } = couponResponse;
+    if (appliedCoupon) {
+      if (appliedCoupon.type === DiscountType.FLAT && appliedCoupon.discount) {
+        discount = appliedCoupon.discount;
+      } else if (
+        appliedCoupon.type === DiscountType.PERCENTAGE &&
+        appliedCoupon.discount
+      ) {
+        discount = (itemBill * appliedCoupon.discount) / 100;
+        if (discount > appliedCoupon.upto) {
+          discount = appliedCoupon.upto;
+        }
+      }
+    }
     const bill = {
       itemToatal: itemBill,
       gst: gstAmount,
       delivery: deliveryAmount,
       platfrom: platfromAmount,
       grandTotal: totalAmount,
-      roundOff: parseFloat((totalAmount - Math.floor(totalAmount)).toFixed(2)),
-      toPay: Math.floor(totalAmount),
+      discount,
+      roundOff: parseFloat(
+        (totalAmount - discount - Math.floor(totalAmount - discount)).toFixed(2)
+      ),
+      toPay: Math.floor(totalAmount - discount),
     };
+
+    if (couponResponse.freeItem) {
+      const freeItem: IMenuItem = couponResponse.freeItem;
+      freeItem.price = 0;
+      items.push({ quantity: 1, menuItem: freeItem });
+    }
     const order = new Order({
       restroId: restaurantId,
       userId,
