@@ -1,6 +1,5 @@
 import { Strategy } from "passport-local";
 import User from "../../models/user";
-import bcrypt from "bcrypt";
 
 export const localStrategy = new Strategy(async (username, password, done) => {
   try {
