@@ -45,20 +45,55 @@ SearchRouter.get("/:keyword", async (req: Request, res: Response) => {
   try {
     const { keyword } = req.params;
 
-    const restaurants = await Restaurant.find({
-      $or: [
-        { name: { $regex: keyword, $options: "i" } },
-        {
-          cuisins: { $regex: keyword, $options: "i" },
+    const { rating, veg, longitude: lon, latitude: lat, nearest } = req.query;
+    const longitude = lon?.toString();
+    const latitude = lat?.toString();
+
+    let filter: any = [{ status: "Approved" }];
+    if (rating) {
+      filter.push({ ratings: { $gte: "4" } });
+    }
+    if (veg) {
+      filter.push({ isVeg: true });
+    }
+    if (nearest) {
+      filter.push({ "outlets.distance": { $lte: 3000 } });
+    }
+    if (!longitude || !latitude) {
+      return res.status(200).send({
+        success: true,
+        allRestaurants: [],
+      });
+    }
+
+    const restaurants = await Restaurant.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [Number(longitude), Number(latitude)],
+          },
+          distanceField: "outlets.distance",
+          spherical: true,
+          key: "outlets.location",
         },
-        {
-          menuGroups: { $regex: keyword, $options: "i" },
+      },
+      {
+        $match: {
+          $and: [
+            {
+              $or: [
+                { name: { $regex: keyword, $options: "i" } },
+                { cuisins: { $regex: keyword, $options: "i" } },
+                { menuGroups: { $regex: keyword, $options: "i" } },
+                { "menuItems.name": { $regex: keyword, $options: "i" } },
+              ],
+            },
+            ...filter,
+          ],
         },
-        {
-          "menuItems.name": { $regex: keyword, $options: "i" },
-        },
-      ],
-    });
+      },
+    ]);
 
     const allRestaurants = restaurants.map((restro) => ({
       id: restro._id,
@@ -66,6 +101,7 @@ SearchRouter.get("/:keyword", async (req: Request, res: Response) => {
       ratings: restro.ratings,
       logoUrl: restro.logoUrl,
       tags: restro.cuisins.splice(0, 2),
+      distance: restro.outlets.distance,
     }));
 
     return res.status(200).send({
