@@ -21,10 +21,10 @@ const app: Express = express();
 app.use(
   cookieSession({
     name: "session",
-    keys: [process.env.SESSION_SECRET || ""],
+    keys: [process.env.SESSION_SECRET || "default_secret"],
     maxAge: 24 * 60 * 60 * 1000,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.Node_ENV === "production" ? "none" : "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   })
 );
 
