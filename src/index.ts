@@ -59,6 +59,7 @@ app.use("/api/coupons", CouponRouter);
 app.get("/test", async (req: Request, res: Response) => {
   res.status(200).send({
     success: true,
+    message: "test deployment",
   });
 });
 
