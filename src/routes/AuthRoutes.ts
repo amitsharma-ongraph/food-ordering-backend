@@ -56,6 +56,7 @@ authRouter.get("/authenticate", isLoggedIn, async (req, res) => {
     success: true,
     //@ts-ignore
     userId: req.session.passport.user,
+    cookies:req.cookies
   });
 });
 
@@ -79,7 +80,7 @@ authRouter.post("/login", async (req: Request, res: Response, next) => {
           });
         }
       });
-      res.status(200).json({ success: true, message: "Login successful" });
+      res.status(200).json({ success: true, message: "Login successful"});
     }
   )(req, res, next);
 });
