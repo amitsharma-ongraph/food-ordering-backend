@@ -18,12 +18,14 @@ import { CouponRouter } from "./routes/CouponRoutes";
 
 const app: Express = express();
 
+app.set("trust proxy", 1);
+
 app.use(
   cookieSession({
     name: "session",
     keys: [process.env.SESSION_SECRET || ""],
     maxAge: 24 * 60 * 60 * 1000,
-    secure: false,
+    secure: true,
     sameSite: "none",
     httpOnly: true,
   })
