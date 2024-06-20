@@ -23,8 +23,8 @@ app.use(
     name: "session",
     keys: [process.env.SESSION_SECRET || ""],
     maxAge: 24 * 60 * 60 * 1000,
-    secure: true,
-    sameSite: "none",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.Node_ENV === "production" ? "none" : "lax",
   })
 );
 
