@@ -7,7 +7,6 @@ export const isLoggedIn = async (
   next: NextFunction
 ) => {
   try {
-    console.log("req headers", req.headers.cookie);
     //@ts-ignore
     const isLoggedIn: boolean =(req.isAuthenticated() && req.user!==undefined) ? true : false;
     if (isLoggedIn) {
