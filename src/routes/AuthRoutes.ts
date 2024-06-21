@@ -39,7 +39,7 @@ authRouter.get("/login/failed", async (req: Request, res: Response) => {
 authRouter.get("/logout", async (req, res) => {
   try {
     //req.logOut(() => {});
-    res.clearCookie("session");
+    res.clearCookie("sessiontest");
     res.clearCookie("session.sig");
     return res.send({
       success: true,
