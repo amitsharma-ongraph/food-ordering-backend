@@ -38,18 +38,6 @@ authRouter.get("/login/failed", async (req: Request, res: Response) => {
 
 authRouter.get("/logout", async (req, res) => {
   try {
-    const cookies = req.headers.cookie;
-
-    if (cookies) {
-      const cookieArray = cookies.split("; ");
-
-      const cookieStrings = cookieArray.map((cookie) => {
-        const [key, value] = cookie.split("=");
-        return `${key}=${value}; Path=/; httponly; secure; samesite=none; Max-Age=0`;
-      });
-      console.log("backend logout cookieString", cookieStrings);
-      res.setHeader("Set-Cookie", cookieStrings);
-    }
     req.logOut(() => {});
     return res.send({
       success: true,
