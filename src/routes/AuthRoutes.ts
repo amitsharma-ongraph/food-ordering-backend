@@ -39,6 +39,15 @@ authRouter.get("/login/failed", async (req: Request, res: Response) => {
 authRouter.get("/logout", async (req, res) => {
   try {
     req.logOut(() => {});
+    const cookies=req.body.cookies
+    if (cookies) {
+      const cookieStrings = Object.entries(cookies).map(([key, value]) => {
+      
+        return `${key}=${value}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`;
+      })
+      
+      res.setHeader('Set-Cookie', cookieStrings);
+    }
     return res.send({
       success: true,
       message: "logout success",
