@@ -5,6 +5,7 @@ import User from "../models/user";
 import bcrypt from "bcrypt";
 import Restaurant from "../models/restaurant";
 import { TwilioClient } from "../twilio";
+import cookie from "cookie";
 
 const authRouter: Router = express.Router();
 
@@ -38,7 +39,13 @@ authRouter.get("/login/failed", async (req: Request, res: Response) => {
 
 authRouter.get("/logout", async (req, res) => {
   try {
-    req.logOut(() => {});
+    // req.logOut(() => {});
+    res.clearCookie("session", {
+      path: "/",
+      secure: true,
+      sameSite: "none",
+      httpOnly: true,
+    });
     return res.send({
       success: true,
       message: "logout success",
