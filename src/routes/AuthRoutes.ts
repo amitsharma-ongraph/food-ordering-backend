@@ -40,6 +40,7 @@ authRouter.get("/logout", async (req, res) => {
   try {
     req.logOut(() => {});
     const cookies=req.body.cookies
+    console.log("backend logout cookies",cookies)
     if (cookies) {
       const cookieStrings = Object.entries(cookies).map(([key, value]) => {
       
