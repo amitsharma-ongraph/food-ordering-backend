@@ -39,7 +39,6 @@ authRouter.get("/login/failed", async (req: Request, res: Response) => {
 authRouter.get("/logout", async (req, res) => {
   try {
     req.logOut(() => {});
-    res.setHeader('Set-Cookie', [`session="null"; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`,`session.sig="null"; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`]);
     return res.send({
       success: true,
       message: "logout success",
