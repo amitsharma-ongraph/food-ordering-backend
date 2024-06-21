@@ -44,8 +44,8 @@ authRouter.get("/logout", async (req, res) => {
       const cookieArray = cookies.split("; ");
 
       const cookieStrings = cookieArray.map((cookie) => {
-        const [key] = cookie.split("=");
-        return `${key}="null"; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`;
+        const [key, value] = cookie.split("=");
+        return `${key}=${value}; Path=/; httponly; secure; samesite=none; Max-Age=0`;
       });
       console.log("backend logout cookieString", cookieStrings);
       res.setHeader("Set-Cookie", cookieStrings);
