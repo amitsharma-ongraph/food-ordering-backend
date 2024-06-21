@@ -38,6 +38,8 @@ authRouter.get("/login/failed", async (req: Request, res: Response) => {
 
 authRouter.get("/logout", async (req, res) => {
   try {
+    console.log("logout request cookies", req.cookies);
+    console.log("logout request header cookies", req.headers.cookie);
     req.logOut(() => {});
     return res.send({
       success: true,
@@ -56,7 +58,7 @@ authRouter.get("/authenticate", isLoggedIn, async (req, res) => {
     success: true,
     //@ts-ignore
     userId: req.session.passport.user,
-    cookies:req.cookies
+    cookies: req.cookies,
   });
 });
 
@@ -80,7 +82,7 @@ authRouter.post("/login", async (req: Request, res: Response, next) => {
           });
         }
       });
-      res.status(200).json({ success: true, message: "Login successful"});
+      res.status(200).json({ success: true, message: "Login successful" });
     }
   )(req, res, next);
 });
