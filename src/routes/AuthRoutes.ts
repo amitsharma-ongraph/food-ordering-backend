@@ -38,7 +38,9 @@ authRouter.get("/login/failed", async (req: Request, res: Response) => {
 
 authRouter.get("/logout", async (req, res) => {
   try {
-    req.logOut(() => {});
+    req.logOut((err) => {
+      console.log("passport logout error", err);
+    });
 
     return res.send({
       success: true,
@@ -217,7 +219,6 @@ authRouter.post("/verify-otp", async (req, res) => {
             contactNo: phoneNumber,
             verified: true,
           });
-          console.log("user -->", user);
           if (!user) {
             throw new Error("user not found");
           }

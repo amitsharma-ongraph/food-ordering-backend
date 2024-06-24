@@ -94,7 +94,6 @@ CouponRouter.delete(
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      console.log("coupon to delete", id);
       await Coupon.findByIdAndDelete(id);
       return res.status(200).send({
         success: true,
