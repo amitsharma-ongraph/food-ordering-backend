@@ -5,7 +5,6 @@ import User from "../models/user";
 import bcrypt from "bcrypt";
 import Restaurant from "../models/restaurant";
 import { TwilioClient } from "../twilio";
-import cookie from "cookie";
 
 const authRouter: Router = express.Router();
 
